@@ -1,13 +1,10 @@
-require 'rubygems'
-require 'rake'
-
 spec = Gem::Specification.new do |spec|
   spec.name = 'activerecord-tableless'
   spec.summary = %q{A library for implementing tableless ActiveRecord models}
   spec.description = %q{ActiveRecord Tableless provides a simple mixin for creating models that are not bound to the database. This approach is mostly useful for capitalizing on the features ActiveRecord::Validation}
   spec.authors = ["Michal Zima", "Kenneth Kalmer"]
   spec.email = "xhire@mujmalysvet.cz"
-  spec.files = FileList[ "*.rb", "lib/*.rb", "Rakefile", "README", "CHANGELOG" ]
+  spec.files = ["*.rb", "lib/*.rb", "Rakefile", "README", "CHANGELOG"].collect {|f| Dir.glob(f) }.flatten
   spec.version = "0.1.1"
   spec.add_dependency("activerecord")
   spec.has_rdoc = true
