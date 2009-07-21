@@ -8,7 +8,7 @@ spec = Gem::Specification.new do |spec|
   spec.author = "Michal Zima"
   spec.email = "xhire@mujmalysvet.cz"
   spec.files = FileList[ "*.rb", "lib/*.rb", "Rakefile", "README", "CHANGELOG" ]
-  spec.version = "0.1.0"
+  spec.version = "0.1.1"
   spec.add_dependency("activerecord")
   spec.has_rdoc = true
   spec.extra_rdoc_files = %w( README CHANGELOG )
