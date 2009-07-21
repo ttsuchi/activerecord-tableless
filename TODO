@@ -1,6 +1,3 @@
-ActiveRecord::Tableless TODO
-----------------------------
-
 0.1.x (Make it useful)
 * More documentation, better examples
 * Tests
