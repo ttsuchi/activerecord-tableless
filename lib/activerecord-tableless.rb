@@ -55,6 +55,9 @@ module ActiveRecord
         # setup columns
       end
 
+      def tableless?
+        false
+      end
     end
 
     module SingletonMethods
@@ -79,13 +82,16 @@ module ActiveRecord
 
       %w(find create destroy).each do |m|
         eval %{
-          def #{m}
+          def #{m}(*args)
             logger.warn "Can't #{m} a Tableless object"
             false
           end
         }
       end
 
+      def tableless?
+        true
+      end
     end
 
     module ClassMethods
@@ -116,7 +122,7 @@ module ActiveRecord
 
       %w(save destroy).each do |m|
         eval %{
-          def #{m}
+          def #{m}(*args)
             logger.warn "Can't #{m} a Tableless object"
             false
           end
