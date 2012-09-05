@@ -1,4 +1,7 @@
-ActiveRecord::Tableless CHANGELOG
----------------------------------
+0.1.1 - Jul 21th 2009
+ * Method for bulk adding of columns
+ * Code cleaning
+ * Rename of the project
 
-2008-05-01 - Initial code, rough around the edges.
+0.1.0 - May 1st 2008
+ * Initial code, rough around the edges.
