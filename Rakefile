@@ -3,13 +3,13 @@ require 'rdoc/task'
 
 task :default do
   puts
-  puts IO.read( File.dirname(__FILE__) + '/README' )
+  puts IO.read(File.join(File.dirname(__FILE__), 'README')
   puts
 end
 
 Rake::RDocTask.new do |rd|
   rd.main = 'README'
-  rd.rdoc_files.include( 'README', 'lib/*.rb', 'lib/**/*.rb' )
+  rd.rdoc_files.include('README', 'lib/*.rb', 'lib/**/*.rb')
   rd.rdoc_dir = 'rdoc'
-  rd.title = 'ActiveRecord Tableless Models'
+  rd.title = 'ActiveRecord Tableless'
 end

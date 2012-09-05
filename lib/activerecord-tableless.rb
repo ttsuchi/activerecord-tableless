@@ -30,7 +30,7 @@ module ActiveRecord
   module Tableless
     
     def self.included( base ) #:nodoc:
-      base.send( :extend, ActsMethods )
+      base.send :extend, ActsMethods
     end
     
     module ActsMethods #:nodoc:
@@ -70,6 +70,13 @@ module ActiveRecord
         tableless_options[:columns] << ActiveRecord::ConnectionAdapters::Column.new(name.to_s, default, sql_type.to_s, null)
       end
       
+      # Register a set of colums with the same SQL type
+      def add_columns(sql_type, *args)
+        args.each do |col|
+          column col, sql_type
+        end
+      end
+
       %w(find create destroy).each do |m| 
         eval %{ 
           def #{m}(*args)

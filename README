@@ -1,8 +1,8 @@
-ActiveRecord Tableless Models
------------------------------
+ActiveRecord Tableless
+----------------------
 
-A single implementation of the ActiveRecord Tableless Model pattern for any
-Rails project or other Ruby project that uses ActiveRecord.
+A single implementation of the ActiveRecord Tableless pattern for any Rails
+project or other Ruby project that uses ActiveRecord.
 
 Define a model like this:
 
@@ -31,5 +31,4 @@ def message
     end
   end
 end
-
 

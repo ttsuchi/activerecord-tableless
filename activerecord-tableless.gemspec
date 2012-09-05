@@ -1,7 +1,7 @@
 # -*- ruby -*-
 
 Gem::Specification.new do |gem|
-  gem.authors       = ["Jarl Friis", "Kenneth Kalmer"]
+  gem.authors       = ["Jarl Friis", "Kenneth Kalmer", "Michal Zima"]
   gem.email         = ["jarl@softace.dk"]
   gem.name          = 'activerecord-tableless'
   gem.summary       = %q{A library for implementing tableless ActiveRecord models}
