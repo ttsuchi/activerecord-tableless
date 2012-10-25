@@ -18,8 +18,16 @@ Gem::Specification.new do |gem|
   gem.require_paths = ["lib"]
   gem.platform      = Gem::Platform::RUBY
 
-  gem.add_dependency("activerecord", ">=3.2")
+  gem.add_dependency("activerecord", "~> 3.2.0")
 
   gem.add_development_dependency('bundler')
   gem.add_development_dependency('rake')
+
+  gem.add_development_dependency("rails", "~> 3.2.0")
+  gem.add_development_dependency('appraisal', '~> 0.4')
+  gem.add_development_dependency('sqlite3', '~> 1.3')
+  gem.add_development_dependency('cucumber', '~> 1.1')
+  gem.add_development_dependency('launchy', '~> 2.1')
+  gem.add_development_dependency('aruba')
+  gem.add_development_dependency('capybara')
 end

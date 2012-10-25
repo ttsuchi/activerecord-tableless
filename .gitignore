@@ -2,3 +2,8 @@ nbproject
 tmp
 *.gem
 *emfile.lock
+
+# For emacs:
+*~
+#\#*
+#.\#*
