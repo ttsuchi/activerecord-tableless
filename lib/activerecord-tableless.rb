@@ -39,8 +39,16 @@ module ActiveRecord
       # it.
       def has_no_table
         # keep our options handy
-        class_attribute :tableless_options
-        self.tableless_options = {:columns => []}
+        if Rails::VERSION::STRING < "3.1.0"
+          write_inheritable_attribute(
+                                      :tableless_options,
+                                      :columns => []
+                                      )
+          class_inheritable_reader :tableless_options
+        else
+          class_attribute :tableless_options
+          self.tableless_options = {:columns => []}
+        end
 
         # extend
         extend  ActiveRecord::Tableless::SingletonMethods

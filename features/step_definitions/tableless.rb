@@ -28,7 +28,7 @@ Given /^I update my users controller to render instead of redirect$/ do
     content.gsub!("if @user.save",
                   "if @user.valid?")
 
-    content.gsub!(/format.html \{ redirect_to @user, .*? \}/,
+    content.gsub!(/format.html \{ redirect_to[\( ]@user, .*? \}/,
                   "format.html { render :action => 'show' }")
     File.open(file_name, 'w') { |f| f << content }
   end
