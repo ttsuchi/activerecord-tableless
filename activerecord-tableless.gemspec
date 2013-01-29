@@ -18,13 +18,12 @@ Gem::Specification.new do |gem|
   gem.require_paths = ["lib"]
   gem.platform      = Gem::Platform::RUBY
 
-  gem.add_dependency("activerecord", ">= 3.0.0")
+  gem.add_dependency("activerecord", ">= 2.3.0")
 
   gem.add_development_dependency('bundler')
   gem.add_development_dependency('rake')
 
-  gem.add_development_dependency("rails", ">= 3.2.0")
-  gem.add_development_dependency("jquery-rails", ">= 2.0")
+  #  gem.add_development_dependency("rails") # This is in the appraisal gemfiles
   gem.add_development_dependency('sqlite3', '~> 1.3')
 
   gem.add_development_dependency('appraisal', '~> 0.4')

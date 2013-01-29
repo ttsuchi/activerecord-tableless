@@ -7,7 +7,7 @@ Given /^I generate a new rails application$/ do
       """
       source "http://rubygems.org"
       gem "rails", "#{framework_version}"
-      gem "jquery-rails" #Needed for rails >= 3.2.8
+      #{"gem \"jquery-rails\"" if framework_version >= "3.2"}
       gem "sqlite3"
       gem "capybara"
       gem "gherkin"

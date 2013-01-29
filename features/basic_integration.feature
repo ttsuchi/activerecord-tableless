@@ -11,6 +11,6 @@ Feature: Rails integration
     And I start the rails application
     When I go to the new user page
     And I fill in "Name" with "something"
-    And I press "Create User"
+    And I press "Create"
     Then I should see "Name: something"
 

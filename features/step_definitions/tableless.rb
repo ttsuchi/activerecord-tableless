@@ -8,6 +8,10 @@ Given /^I update my new user model to be tableless$/ do
   in_current_dir do
     file_name = 'app/models/user.rb'
     content = File.read(file_name)
+    if framework_version < "3.0"
+      content = "require 'activerecord-tableless'\n" + content
+    end
+
     content.gsub!(/^(class .* < ActiveRecord::Base)$/, "\\1\n" + <<-TABLELESS)
   has_no_table
   column :id, :integer
@@ -22,6 +26,7 @@ Given /^I update my users controller to render instead of redirect$/ do
   in_current_dir do
     file_name = 'app/controllers/users_controller.rb'
     content = File.read(file_name)
+
     content.gsub!("@user = User.new(params[:user])",
                   "@user = User.new(params[:user]); @user.id = 1")
 
