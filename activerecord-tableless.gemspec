@@ -30,6 +30,6 @@ Gem::Specification.new do |gem|
   gem.add_development_dependency('appraisal', '~> 0.4')
   gem.add_development_dependency('cucumber', '~> 1.1')
   gem.add_development_dependency('launchy', '~> 2.1')
-  gem.add_development_dependency('aruba')
+  gem.add_development_dependency('aruba', '>= 0.5')
   gem.add_development_dependency('capybara')
 end
