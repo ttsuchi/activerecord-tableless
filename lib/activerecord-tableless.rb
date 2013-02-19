@@ -39,7 +39,7 @@ module ActiveRecord
       # it.
       def has_no_table
         # keep our options handy
-        if Rails::VERSION::STRING < "3.1.0"
+        if ActiveRecord::VERSION::STRING < "3.1.0"
           write_inheritable_attribute(
                                       :tableless_options,
                                       :columns => []

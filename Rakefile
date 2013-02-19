@@ -1,6 +1,7 @@
 require 'bundler/gem_tasks'
 require 'appraisal'
 require 'rake/testtask'
+require 'rspec/core/rake_task'
 require 'cucumber/rake/task'
 
 desc 'Default: clean, all.'
@@ -9,10 +10,10 @@ task :default => [:clean, :all]
 desc 'Test the activerecord-tableless on all supported Rails versions.'
 task :all do |t|
   if ENV['BUNDLE_GEMFILE']
-    exec('rake test cucumber')
+    exec('rake test spec cucumber')
   else
     Rake::Task["appraisal:install"].execute
-    exec('rake appraisal test cucumber')
+    exec('rake appraisal test spec cucumber')
   end
 end
 
@@ -21,6 +22,12 @@ Rake::TestTask.new(:test) do |t|
   t.libs << 'lib' << 'profile'
   t.pattern = 'test/**/*_test.rb'
   t.verbose = true
+end
+
+desc "Run specs"
+RSpec::Core::RakeTask.new do |t|
+  t.pattern = "./spec/**/*_spec.rb" # don't need this, it's default.
+  # Put spec opts in a file named .rspec in root
 end
 
 desc 'Run integration test'
