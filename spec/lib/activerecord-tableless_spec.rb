@@ -41,9 +41,22 @@ describe "tableless with fail_fast" do
   subject { ChairFailure.new }
 
   describe "class" do
-    describe "#find" do
-      it "raises ActiveRecord::Tableless::NoDatabase" do
-        expect { klass.find(1) }.to raise_exception(ActiveRecord::Tableless::NoDatabase)
+    if ActiveRecord::VERSION::STRING < "3.0"
+      describe "#find" do
+        it "raises ActiveRecord::Tableless::NoDatabase" do
+          expect { klass.find(1) }.to raise_exception(ActiveRecord::Tableless::NoDatabase)
+        end
+      end
+      describe "#find(:all)" do
+        it "raises ActiveRecord::Tableless::NoDatabase" do
+          expect { klass.find(:all) }.to raise_exception(ActiveRecord::Tableless::NoDatabase)
+        end
+      end
+    else ## ActiveRecord::VERSION::STRING >= "3.0"
+      describe "#all" do
+        it "raises ActiveRecord::Tableless::NoDatabase" do
+          expect { klass.all }.to raise_exception(ActiveRecord::Tableless::NoDatabase)
+        end
       end
     end
     describe "#create" do
@@ -86,6 +99,33 @@ describe "tableless with fail_fast" do
 end
 
 shared_examples_for "a succeeding database" do
+
+  describe "class" do
+    if ActiveRecord::VERSION::STRING < "3.0"
+      describe "#find" do
+        it "raises ActiveRecord::RecordNotFound" do
+          expect { klass.find(314) }.to raise_exception(ActiveRecord::RecordNotFound)
+        end
+      end
+      describe "#find(:all)" do
+        specify { klass.find(:all) == []}
+      end
+    else ## ActiveRecord::VERSION::STRING >= "3.0"
+      describe "#all" do
+        specify { klass.all == []}
+      end
+    end
+    describe "#create" do
+      specify { klass.create(:name => 'Jarl') == true }
+    end
+    describe "#destroy" do
+      specify { klass.destroy(1) == true }
+    end
+    describe "#destroy_all" do
+      specify { klass.destroy_all == true }
+    end
+  end
+
   describe "#save" do
     specify { subject.save.should == true }
   end
@@ -103,11 +143,13 @@ end
 
 describe "tableless with real database" do
   ##This is only here to ensure that the shared examples are actually behaving like a real database.
+  let!(:klass) { Chair }
   subject { Chair.new(:name => 'Jarl') }
   it_behaves_like "a succeeding database"
 end
 
 describe "tableless with succeeding database" do
+  let!(:klass) { ChairPretend }
   subject { ChairPretend.new(:name => 'Jarl') }
   it_behaves_like "a succeeding database"
 end

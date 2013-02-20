@@ -95,17 +95,48 @@ module ActiveRecord
         end
       end
 
-      %w(find create destroy destroy_all).each do |m| 
+      %w(destroy destroy_all).each do |m| 
         eval %{ 
           def #{m}(*args)
             case tableless_options[:database]
             when :pretend_succes
-              true
+              self
             when :fail_fast
               raise NoDatabase.new("Can't ##{m} on Tableless class")
             end
           end
         }
+      end
+      
+      if ActiveRecord::VERSION::STRING < "3.0"
+        def find_with_ids(*args)
+          case tableless_options[:database]
+          when :pretend_succes
+            raise ActiveRecord::RecordNotFound.new("Couldn't find #{self} with ID=#{args[0].to_s}")
+            
+          when :fail_fast
+            raise NoDatabase.new("Can't #find_from_ids on Tableless class")
+          end
+        end
+        
+        def find_every(*args)
+          case tableless_options[:database]
+          when :pretend_succes
+            []
+          when :fail_fast
+            raise NoDatabase.new("Can't #find_every on Tableless class")
+          end
+        end
+      else ## ActiveRecord::VERSION::STRING >= "3.0"
+        def all(*args)
+          case tableless_options[:database]
+          when :pretend_succes
+            []
+          when :fail_fast
+            raise NoDatabase.new("Can't #find_every on Tableless class")
+          end
+          
+        end
       end
       
       def transaction(&block)

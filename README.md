@@ -59,6 +59,11 @@ For Rails 2.3.x series you need to add this line in the top of your model file.
 
     require 'activerecord-tableless'
 
+If you wish (this is not recommended), you can pretend you have a succeeding database by using
+
+    has_no_table :database => :pretend_succes
+
+
 
 Development
 -----------
