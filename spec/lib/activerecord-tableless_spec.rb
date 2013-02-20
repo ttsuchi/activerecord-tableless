@@ -4,6 +4,7 @@ require 'activerecord-tableless'
 require 'logger'
 
 ActiveRecord::Base.logger = Logger.new(STDERR)
+ActiveRecord::Base.logger.level = Logger::Severity::UNKNOWN
 
 class ChairFailure < ActiveRecord::Base
   has_no_table
@@ -17,8 +18,8 @@ class ChairPretend < ActiveRecord::Base
   column :name, :string
 end
 
-ActiveRecord::Base.establish_connection(:adapter  => 'sqlite3',
-                                        :database => 'tmp/test.db')
+FileUtils.mkdir "tmp"
+ActiveRecord::Base.establish_connection(:adapter  => 'sqlite3', :database => 'tmp/test.db')
 ActiveRecord::Base.connection.execute("drop table if exists chairs")
 ActiveRecord::Base.connection.execute("create table chairs (id INTEGER PRIMARY KEY, name TEXT )")
 
