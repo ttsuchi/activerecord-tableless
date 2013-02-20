@@ -18,15 +18,7 @@ class ChairPretend < ActiveRecord::Base
   column :name, :string
 end
 
-FileUtils.mkdir_p "tmp"
-ActiveRecord::Base.establish_connection(:adapter  => 'sqlite3', :database => 'tmp/test.db')
-ActiveRecord::Base.connection.execute("drop table if exists chairs")
-ActiveRecord::Base.connection.execute("create table chairs (id INTEGER PRIMARY KEY, name TEXT )")
-
-class Chair < ActiveRecord::Base
-end
-
-describe "tableless attributes" do
+describe "Tableless attributes" do
 
   subject { ChairFailure.new }
   it { should respond_to :id }
@@ -36,7 +28,7 @@ describe "tableless attributes" do
 
 end
 
-describe "tableless with fail_fast" do
+describe "Tableless with fail_fast" do
   let!(:klass) { ChairFailure }
   subject { ChairFailure.new }
 
@@ -141,14 +133,27 @@ shared_examples_for "a succeeding database" do
   end
 end
 
-describe "tableless with real database" do
+describe "Active record with real database" do
   ##This is only here to ensure that the shared examples are actually behaving like a real database.
+  before(:all) do
+    FileUtils.mkdir_p "tmp"
+    ActiveRecord::Base.establish_connection(:adapter  => 'sqlite3', :database => 'tmp/test.db')
+    ActiveRecord::Base.connection.execute("drop table if exists chairs")
+    ActiveRecord::Base.connection.execute("create table chairs (id INTEGER PRIMARY KEY, name TEXT )")
+    
+    Object.send(:remove_const, Chair) rescue nil
+    class Chair < ActiveRecord::Base
+    end
+  end
+  before(:all) do
+    ActiveRecord::Base.clear_all_connections!
+  end
   let!(:klass) { Chair }
   subject { Chair.new(:name => 'Jarl') }
   it_behaves_like "a succeeding database"
 end
 
-describe "tableless with succeeding database" do
+describe "Tableless with succeeding database" do
   let!(:klass) { ChairPretend }
   subject { ChairPretend.new(:name => 'Jarl') }
   it_behaves_like "a succeeding database"

@@ -73,6 +73,7 @@ module ActiveRecord
       def tableless?
         false
       end
+
     end
     
     module SingletonMethods
@@ -109,7 +110,7 @@ module ActiveRecord
       end
       
       if ActiveRecord::VERSION::STRING < "3.0"
-        def find_with_ids(*args)
+        def find_from_ids(*args)
           case tableless_options[:database]
           when :pretend_success
             raise ActiveRecord::RecordNotFound.new("Couldn't find #{self} with ID=#{args[0].to_s}")
@@ -150,6 +151,13 @@ module ActiveRecord
       
       def tableless?
         true
+      end
+
+      if ActiveRecord::VERSION::STRING < "3.1.0"
+      else
+        def table_exists?
+          false
+        end
       end
     end
     
