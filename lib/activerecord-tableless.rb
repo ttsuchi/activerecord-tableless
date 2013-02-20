@@ -29,6 +29,11 @@ module ActiveRecord
   #
   module Tableless
     
+    class Exception < StandardError
+    end
+    class NoDatabase < Exception
+    end
+
     def self.included( base ) #:nodoc:
       base.send :extend, ActsMethods
     end
@@ -37,17 +42,21 @@ module ActiveRecord
       
       # A model that needs to be tableless will call this method to indicate
       # it.
-      def has_no_table
+      def has_no_table(options = {:database => :fail_fast})
         # keep our options handy
         if ActiveRecord::VERSION::STRING < "3.1.0"
-          write_inheritable_attribute(
-                                      :tableless_options,
-                                      :columns => []
+          write_inheritable_attribute(:tableless_options,
+                                      { :database => options[:database],
+                                        :columns => []
+                                      }
                                       )
           class_inheritable_reader :tableless_options
         else
           class_attribute :tableless_options
-          self.tableless_options = {:columns => []}
+          self.tableless_options = {
+            :database => options[:database],
+            :columns => []
+          }
         end
 
         # extend
@@ -94,6 +103,17 @@ module ActiveRecord
         }
       end
       
+      def transaction(&block)
+        case tableless_options[:database]
+        when :pretend_succes
+          yield
+        when :fail_fast
+          raise NoDatabase.new("Can't use transactions on Tableless object")
+        else
+          raise ArgumentError.new("Invalid option")
+        end
+      end
+      
       def tableless?
         true
       end
@@ -125,14 +145,61 @@ module ActiveRecord
         attributes.to_a.collect{|(name,value)| escaped_var_name(name, prefix) + "=" + escape_for_url(value) if value }.compact.join("&")
       end
     
-      %w(save destroy).each do |m| 
-        eval %{ 
-          def #{m}(*args)
-            logger.warn "Can't #{m} a Tableless object"
-            false
-          end
-        }
+      def save(*args)
+        case self.class.tableless_options[:database]
+        when :pretend_succes
+          true
+        when :fail_fast
+          raise NoDatabase.new("Can't save a Tableless object")
+        else
+          raise ArgumentError.new("Invalid option")
+        end
       end
+
+      def save!(*args)
+        case self.class.tableless_options[:database]
+        when :pretend_succes
+          true
+        when :fail_fast
+          raise NoDatabase.new("Can't save! a Tableless object")
+        else
+          raise ArgumentError.new("Invalid option")
+        end
+      end
+
+      def destroy
+        case self.class.tableless_options[:database]
+        when :pretend_succes
+          @destroyed = true
+          freeze
+        when :fail_fast
+          raise NoDatabase.new("Can't destroy a Tableless object")
+        else
+          raise ArgumentError.new("Invalid option")
+        end
+      end
+
+      def reload(*args)
+        case self.class.tableless_options[:database]
+        when :pretend_succes
+          self
+        when :fail_fast
+          raise NoDatabase.new("Can't reload a Tableless object")
+        else
+          raise ArgumentError.new("Invalid option")
+        end
+      end
+      
+      # def update_attributes(*args)
+      #   case self.class.tableless_options[:database]
+      #   when :pretend_succes
+      #     self
+      #   when :fail_fast
+      #     raise NoDatabase.new("Can't reload a Tableless object")
+      #   else
+      #     raise ArgumentError.new("Invalid option")
+      #   end
+      # end
       
       private
       
