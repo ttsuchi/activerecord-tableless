@@ -13,7 +13,7 @@ class ChairFailure < ActiveRecord::Base
 end
 
 class ChairPretend < ActiveRecord::Base
-  has_no_table :database => :pretend_succes
+  has_no_table :database => :pretend_success
   column :id, :integer
   column :name, :string
 end

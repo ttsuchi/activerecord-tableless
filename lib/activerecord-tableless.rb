@@ -43,7 +43,7 @@ module ActiveRecord
       # A model that needs to be tableless will call this method to indicate
       # it.
       def has_no_table(options = {:database => :fail_fast})
-        raise ArgumentError.new("Invalid database option '#{options[:database]}'") unless [:fail_fast, :pretend_succes].member? options[:database]
+        raise ArgumentError.new("Invalid database option '#{options[:database]}'") unless [:fail_fast, :pretend_success].member? options[:database]
         # keep our options handy
         if ActiveRecord::VERSION::STRING < "3.1.0"
           write_inheritable_attribute(:tableless_options,
@@ -99,7 +99,7 @@ module ActiveRecord
         eval %{ 
           def #{m}(*args)
             case tableless_options[:database]
-            when :pretend_succes
+            when :pretend_success
               self
             when :fail_fast
               raise NoDatabase.new("Can't ##{m} on Tableless class")
@@ -111,7 +111,7 @@ module ActiveRecord
       if ActiveRecord::VERSION::STRING < "3.0"
         def find_with_ids(*args)
           case tableless_options[:database]
-          when :pretend_succes
+          when :pretend_success
             raise ActiveRecord::RecordNotFound.new("Couldn't find #{self} with ID=#{args[0].to_s}")
             
           when :fail_fast
@@ -121,7 +121,7 @@ module ActiveRecord
         
         def find_every(*args)
           case tableless_options[:database]
-          when :pretend_succes
+          when :pretend_success
             []
           when :fail_fast
             raise NoDatabase.new("Can't #find_every on Tableless class")
@@ -130,7 +130,7 @@ module ActiveRecord
       else ## ActiveRecord::VERSION::STRING >= "3.0"
         def all(*args)
           case tableless_options[:database]
-          when :pretend_succes
+          when :pretend_success
             []
           when :fail_fast
             raise NoDatabase.new("Can't #find_every on Tableless class")
@@ -141,7 +141,7 @@ module ActiveRecord
       
       def transaction(&block)
         case tableless_options[:database]
-        when :pretend_succes
+        when :pretend_success
           yield
         when :fail_fast
           raise NoDatabase.new("Can't #transaction on Tableless class")
@@ -181,7 +181,7 @@ module ActiveRecord
     
       def create(*args)
         case self.class.tableless_options[:database]
-        when :pretend_succes
+        when :pretend_success
           true
         when :fail_fast
           raise NoDatabase.new("Can't #create a Tableless object")
@@ -190,7 +190,7 @@ module ActiveRecord
 
       def update(*args)
         case self.class.tableless_options[:database]
-        when :pretend_succes
+        when :pretend_success
           true
         when :fail_fast
           raise NoDatabase.new("Can't #update a Tableless object")
@@ -199,7 +199,7 @@ module ActiveRecord
 
       def destroy
         case self.class.tableless_options[:database]
-        when :pretend_succes
+        when :pretend_success
           @destroyed = true
           freeze
         when :fail_fast
@@ -209,7 +209,7 @@ module ActiveRecord
 
       def reload(*args)
         case self.class.tableless_options[:database]
-        when :pretend_succes
+        when :pretend_success
           self
         when :fail_fast
           raise NoDatabase.new("Can't #reload a Tableless object")
