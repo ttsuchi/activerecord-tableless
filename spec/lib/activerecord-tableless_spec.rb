@@ -18,7 +18,7 @@ class ChairPretend < ActiveRecord::Base
   column :name, :string
 end
 
-FileUtils.mkdir "tmp"
+FileUtils.mkdir_p "tmp"
 ActiveRecord::Base.establish_connection(:adapter  => 'sqlite3', :database => 'tmp/test.db')
 ActiveRecord::Base.connection.execute("drop table if exists chairs")
 ActiveRecord::Base.connection.execute("create table chairs (id INTEGER PRIMARY KEY, name TEXT )")
@@ -26,7 +26,7 @@ ActiveRecord::Base.connection.execute("create table chairs (id INTEGER PRIMARY K
 class Chair < ActiveRecord::Base
 end
 
-describe "tabless attributes" do
+describe "tableless attributes" do
 
   subject { ChairFailure.new }
   it { should respond_to :id }
@@ -36,8 +36,32 @@ describe "tabless attributes" do
 
 end
 
-describe "tabless defaults to fail_fast" do
+describe "tableless with fail_fast" do
+  let!(:klass) { ChairFailure }
   subject { ChairFailure.new }
+
+  describe "class" do
+    describe "#find" do
+      it "raises ActiveRecord::Tableless::NoDatabase" do
+        expect { klass.find(1) }.to raise_exception(ActiveRecord::Tableless::NoDatabase)
+      end
+    end
+    describe "#create" do
+      it "raises ActiveRecord::Tableless::NoDatabase" do
+        expect { klass.create(:name => 'Jarl') }.to raise_exception(ActiveRecord::Tableless::NoDatabase)
+      end
+    end
+    describe "#destroy" do
+      it "raises ActiveRecord::Tableless::NoDatabase" do
+        expect { klass.destroy(1) }.to raise_exception(ActiveRecord::Tableless::NoDatabase)
+      end
+    end
+    describe "#destroy_all" do
+      it "raises ActiveRecord::Tableless::NoDatabase" do
+        expect { klass.destroy_all }.to raise_exception(ActiveRecord::Tableless::NoDatabase)
+      end
+    end
+  end
 
   describe "#save" do
     it "raises ActiveRecord::Tableless::NoDatabase" do
@@ -77,13 +101,13 @@ shared_examples_for "a succeeding database" do
   end
 end
 
-describe "tabless with real database" do
+describe "tableless with real database" do
   ##This is only here to ensure that the shared examples are actually behaving like a real database.
   subject { Chair.new(:name => 'Jarl') }
   it_behaves_like "a succeeding database"
 end
 
-describe "tabless with succeeding database" do
+describe "tableless with succeeding database" do
   subject { ChairPretend.new(:name => 'Jarl') }
   it_behaves_like "a succeeding database"
 end
