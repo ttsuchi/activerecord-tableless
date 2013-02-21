@@ -3,20 +3,39 @@ require 'active_record'
 require 'activerecord-tableless'
 require 'logger'
 
+def make_tableless_model(database = nil, nested = nil)
+  eval <<EOCLASS
+  class Chair < ActiveRecord::Base
+    #{database ? "has_no_table :database => :#{database}" : 'has_no_table'}
+    column :id, :integer
+    column :name, :string
+    #{if nested 
+      '
+      has_many :arm_rests
+      accepts_nested_attributes_for :arm_rests 
+      '
+      end}
+  end
+EOCLASS
+  if nested
+  eval <<EOCLASS
+    class ArmRest < ActiveRecord::Base
+      has_no_table
+      column :id, :integer
+      column :chair_id, :integer
+      column :name, :string
+    end
+EOCLASS
+  end
+end
+
+def remove_models
+  Object.send(:remove_const, :Chair) rescue nil
+  Object.send(:remove_const, :ArmRest) rescue nil
+end
+
 ActiveRecord::Base.logger = Logger.new(STDERR)
 ActiveRecord::Base.logger.level = Logger::Severity::UNKNOWN
-
-class ChairFailure < ActiveRecord::Base
-  has_no_table
-  column :id, :integer
-  column :name, :string
-end
-
-class ChairPretend < ActiveRecord::Base
-  has_no_table :database => :pretend_success
-  column :id, :integer
-  column :name, :string
-end
 
 shared_examples_for "an active record" do
   it { should respond_to :id }
@@ -25,43 +44,48 @@ shared_examples_for "an active record" do
   it { should respond_to :name= }
 end
 
+shared_examples_for "nested model" do
+  
+end
+
 describe "Tableless with fail_fast" do
-  let!(:klass) { ChairFailure }
-  subject { ChairFailure.new }
+  before(:all) {make_tableless_model(nil, nil)}
+  after(:all){ remove_models }
+  subject { Chair.new }
 
   it_behaves_like "an active record"
   describe "class" do
     if ActiveRecord::VERSION::STRING < "3.0"
       describe "#find" do
         it "raises ActiveRecord::Tableless::NoDatabase" do
-          expect { klass.find(1) }.to raise_exception(ActiveRecord::Tableless::NoDatabase)
+          expect { Chair.find(1) }.to raise_exception(ActiveRecord::Tableless::NoDatabase)
         end
       end
       describe "#find(:all)" do
         it "raises ActiveRecord::Tableless::NoDatabase" do
-          expect { klass.find(:all) }.to raise_exception(ActiveRecord::Tableless::NoDatabase)
+          expect { Chair.find(:all) }.to raise_exception(ActiveRecord::Tableless::NoDatabase)
         end
       end
     else ## ActiveRecord::VERSION::STRING >= "3.0"
       describe "#all" do
         it "raises ActiveRecord::Tableless::NoDatabase" do
-          expect { klass.all }.to raise_exception(ActiveRecord::Tableless::NoDatabase)
+          expect { Chair.all }.to raise_exception(ActiveRecord::Tableless::NoDatabase)
         end
       end
     end
     describe "#create" do
       it "raises ActiveRecord::Tableless::NoDatabase" do
-        expect { klass.create(:name => 'Jarl') }.to raise_exception(ActiveRecord::Tableless::NoDatabase)
+        expect { Chair.create(:name => 'Jarl') }.to raise_exception(ActiveRecord::Tableless::NoDatabase)
       end
     end
     describe "#destroy" do
       it "raises ActiveRecord::Tableless::NoDatabase" do
-        expect { klass.destroy(1) }.to raise_exception(ActiveRecord::Tableless::NoDatabase)
+        expect { Chair.destroy(1) }.to raise_exception(ActiveRecord::Tableless::NoDatabase)
       end
     end
     describe "#destroy_all" do
       it "raises ActiveRecord::Tableless::NoDatabase" do
-        expect { klass.destroy_all }.to raise_exception(ActiveRecord::Tableless::NoDatabase)
+        expect { Chair.destroy_all }.to raise_exception(ActiveRecord::Tableless::NoDatabase)
       end
     end
   end
@@ -94,25 +118,25 @@ shared_examples_for "a succeeding database" do
     if ActiveRecord::VERSION::STRING < "3.0"
       describe "#find" do
         it "raises ActiveRecord::RecordNotFound" do
-          expect { klass.find(314) }.to raise_exception(ActiveRecord::RecordNotFound)
+          expect { Chair.find(314) }.to raise_exception(ActiveRecord::RecordNotFound)
         end
       end
       describe "#find(:all)" do
-        specify { klass.find(:all) == []}
+        specify { Chair.find(:all) == []}
       end
     else ## ActiveRecord::VERSION::STRING >= "3.0"
       describe "#all" do
-        specify { klass.all == []}
+        specify { Chair.all == []}
       end
     end
     describe "#create" do
-      specify { klass.create(:name => 'Jarl') == true }
+      specify { Chair.create(:name => 'Jarl') == true }
     end
     describe "#destroy" do
-      specify { klass.destroy(1) == true }
+      specify { Chair.destroy(1) == true }
     end
     describe "#destroy_all" do
-      specify { klass.destroy_all == true }
+      specify { Chair.destroy_all == true }
     end
   end
 
@@ -139,23 +163,23 @@ describe "Active record with real database" do
     ActiveRecord::Base.connection.execute("drop table if exists chairs")
     ActiveRecord::Base.connection.execute("create table chairs (id INTEGER PRIMARY KEY, name TEXT )")
     
-    Object.send(:remove_const, Chair) rescue nil
     class Chair < ActiveRecord::Base
     end
   end
-  before(:all) do
+  after(:all) do
+    remove_models
     ActiveRecord::Base.clear_all_connections!
   end
 
-  let!(:klass) { Chair }
   subject { Chair.new(:name => 'Jarl') }
   it_behaves_like "an active record"
   it_behaves_like "a succeeding database"
 end
 
 describe "Tableless with succeeding database" do
-  let!(:klass) { ChairPretend }
-  subject { ChairPretend.new(:name => 'Jarl') }
+  before(:all) { make_tableless_model(:pretend_success, nil) }
+  after(:all){ remove_models }
+  subject { Chair.new(:name => 'Jarl') }
   it_behaves_like "an active record"
   it_behaves_like "a succeeding database"
 end
