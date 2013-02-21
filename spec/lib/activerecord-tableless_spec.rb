@@ -18,20 +18,18 @@ class ChairPretend < ActiveRecord::Base
   column :name, :string
 end
 
-describe "Tableless attributes" do
-
-  subject { ChairFailure.new }
+shared_examples_for "an active record" do
   it { should respond_to :id }
   it { should respond_to :id= }
   it { should respond_to :name }
   it { should respond_to :name= }
-
 end
 
 describe "Tableless with fail_fast" do
   let!(:klass) { ChairFailure }
   subject { ChairFailure.new }
 
+  it_behaves_like "an active record"
   describe "class" do
     if ActiveRecord::VERSION::STRING < "3.0"
       describe "#find" do
@@ -148,13 +146,16 @@ describe "Active record with real database" do
   before(:all) do
     ActiveRecord::Base.clear_all_connections!
   end
+
   let!(:klass) { Chair }
   subject { Chair.new(:name => 'Jarl') }
+  it_behaves_like "an active record"
   it_behaves_like "a succeeding database"
 end
 
 describe "Tableless with succeeding database" do
   let!(:klass) { ChairPretend }
   subject { ChairPretend.new(:name => 'Jarl') }
+  it_behaves_like "an active record"
   it_behaves_like "a succeeding database"
 end
