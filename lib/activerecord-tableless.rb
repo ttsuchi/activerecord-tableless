@@ -96,17 +96,22 @@ module ActiveRecord
         end
       end
 
-      %w(destroy destroy_all).each do |m| 
-        eval %{ 
-          def #{m}(*args)
-            case tableless_options[:database]
-            when :pretend_success
-              self
-            when :fail_fast
-              raise NoDatabase.new("Can't ##{m} on Tableless class")
-            end
-          end
-        }
+      def destroy(*args)
+        case tableless_options[:database]
+        when :pretend_success
+          self.new()
+        when :fail_fast
+          raise NoDatabase.new("Can't #destroy on Tableless class")
+        end
+      end
+
+      def destroy_all(*args)
+        case tableless_options[:database]
+        when :pretend_success
+          []
+        when :fail_fast
+          raise NoDatabase.new("Can't #destroy_all on Tableless class")
+        end
       end
       
       if ActiveRecord::VERSION::STRING < "3.0"

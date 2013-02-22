@@ -42,17 +42,18 @@ shared_examples_for "an active record" do
   it { should respond_to :id= }
   it { should respond_to :name }
   it { should respond_to :name= }
+  it { should respond_to :update_attributes }
 end
 
-shared_examples_for "nested model" do
-  
+shared_examples_for "a nested active record" do
+  describe "#update_attributes(:all)" do
+    specify do
+      subject.update_attributes(:arm_chair => {:name => 'nice arm_rest'}).should not_raise
+    end
+  end
 end
 
-describe "Tableless with fail_fast" do
-  before(:all) {make_tableless_model(nil, nil)}
-  after(:all){ remove_models }
-  subject { Chair.new }
-
+shared_examples_for "a tableless model with fail_fast" do
   it_behaves_like "an active record"
   describe "class" do
     if ActiveRecord::VERSION::STRING < "3.0"
@@ -112,6 +113,28 @@ describe "Tableless with fail_fast" do
   end
 end
 
+describe "Tableless with fail_fast" do
+  before(:all) {make_tableless_model(nil, nil)}
+  after(:all){ remove_models }
+  subject { Chair.new }
+  it_behaves_like "a tableless model with fail_fast"
+end
+
+describe "Tableless nested with fail_fast" do
+  before(:all) {make_tableless_model(nil, true)}
+  after(:all){ remove_models }
+  subject { Chair.new }
+  it_behaves_like "a tableless model with fail_fast"
+  it_behaves_like "a nested active record"
+  describe "#update_attributes" do
+    it "raises ActiveRecord::Tableless::NoDatabase" do
+      expect do
+        subject.update_attributes(:arm_chair => {:name => 'nice arm_rest'})
+      end.to raise_exception(StandardError)
+    end
+  end
+end
+
 shared_examples_for "a succeeding database" do
   it_behaves_like "an active record"
   describe "class" do
@@ -122,21 +145,21 @@ shared_examples_for "a succeeding database" do
         end
       end
       describe "#find(:all)" do
-        specify { Chair.find(:all) == []}
+        specify { Chair.find(:all).should == []}
       end
     else ## ActiveRecord::VERSION::STRING >= "3.0"
       describe "#all" do
-        specify { Chair.all == []}
+        specify { Chair.all.should == []}
       end
     end
     describe "#create" do
-      specify { Chair.create(:name => 'Jarl') == true }
+      specify { Chair.create(:name => 'Jarl').should be_an_instance_of(Chair) }
     end
     describe "#destroy" do
-      specify { Chair.destroy(1) == true }
+      specify { Chair.destroy(1).should be_an_instance_of(Chair) }
     end
     describe "#destroy_all" do
-      specify { Chair.destroy_all == true }
+      specify { Chair.destroy_all.should == [] }
     end
   end
 
