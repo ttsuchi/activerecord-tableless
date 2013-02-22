@@ -113,7 +113,7 @@ describe "Tableless with fail_fast" do
 end
 
 shared_examples_for "a succeeding database" do
-
+  it_behaves_like "an active record"
   describe "class" do
     if ActiveRecord::VERSION::STRING < "3.0"
       describe "#find" do
@@ -172,7 +172,6 @@ describe "Active record with real database" do
   end
 
   subject { Chair.new(:name => 'Jarl') }
-  it_behaves_like "an active record"
   it_behaves_like "a succeeding database"
 end
 
@@ -180,6 +179,5 @@ describe "Tableless with succeeding database" do
   before(:all) { make_tableless_model(:pretend_success, nil) }
   after(:all){ remove_models }
   subject { Chair.new(:name => 'Jarl') }
-  it_behaves_like "an active record"
   it_behaves_like "a succeeding database"
 end
