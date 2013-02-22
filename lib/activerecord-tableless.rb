@@ -143,6 +143,7 @@ module ActiveRecord
       def transaction(&block)
         case tableless_options[:database]
         when :pretend_success
+          @_current_transaction_records ||= []
           yield
         when :fail_fast
           raise NoDatabase.new("Can't #transaction on Tableless class")
@@ -224,6 +225,12 @@ module ActiveRecord
         end
       end
       
+      if ActiveRecord::VERSION::STRING < "3.0"
+      else
+        def add_to_transaction
+        end
+      end
+
       private
       
         def escaped_var_name(name, prefix = nil)
