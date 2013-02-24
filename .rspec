@@ -1,1 +1,1 @@
---color --backtrace --format doc
+--color --backtrace --debug --format doc
