@@ -146,20 +146,20 @@ module ActiveRecord
       end
       
       def transaction(&block)
-        case tableless_options[:database]
-        when :pretend_success
+#        case tableless_options[:database]
+#        when :pretend_success
           @_current_transaction_records ||= []
           yield
-        when :fail_fast
-          raise NoDatabase.new("Can't #transaction on Tableless class")
-        end
+#        when :fail_fast
+#          raise NoDatabase.new("Can't #transaction on Tableless class")
+#        end
       end
       
       def tableless?
         true
       end
 
-      if ActiveRecord::VERSION::STRING < "3.1.0"
+      if ActiveRecord::VERSION::STRING < "3.0.0"
       else
         def table_exists?
           false
@@ -184,7 +184,12 @@ module ActiveRecord
           new
         end
       end
-      
+
+      def quoted_table_name
+        ""
+      end
+
+  
     end
     
     module InstanceMethods
@@ -193,6 +198,10 @@ module ActiveRecord
         attributes.to_a.collect{|(name,value)| escaped_var_name(name, prefix) + "=" + escape_for_url(value) if value }.compact.join("&")
       end
     
+      def quote_value(value, column = nil)
+        ""
+      end
+
       def create(*args)
         case self.class.tableless_options[:database]
         when :pretend_success

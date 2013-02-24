@@ -20,7 +20,8 @@ EOCLASS
   if nested
   eval <<EOCLASS
     class ArmRest < ActiveRecord::Base
-      has_no_table
+      #{database ? "has_no_table :database => :#{database}" : 'has_no_table'}
+      belongs_to :chair
       column :id, :integer
       column :chair_id, :integer
       column :name, :string
@@ -46,9 +47,28 @@ shared_examples_for "an active record" do
 end
 
 shared_examples_for "a nested active record" do
-  describe "#update_attributes(:all)" do
+  if ActiveRecord::VERSION::STRING < "3.2"
+    describe "conllection#build" do
+      specify do
+        subject.arm_rests.build({:name => 'nice arm_rest'}).should be_an_instance_of(ArmRest)
+      end
+    end
+  end
+  describe "conllection#<<" do
     specify do
-      subject.update_attributes(:arm_chair => {:name => 'nice arm_rest'}).should not_raise
+      (subject.arm_rests << ArmRest.new({:name => 'nice arm_rest'})).should have(1).items
+    end
+    describe "result" do
+      before(:each) do
+        subject.arm_rests << [ArmRest.new({:name => 'left'}),
+                              ArmRest.new({:name => 'right'})]
+      end
+      specify do
+        subject.arm_rests[0].name.should == 'left'
+      end
+      specify do
+        subject.arm_rests[1].name.should == 'right'
+      end
     end
   end
 end
@@ -123,6 +143,28 @@ end
 describe "Tableless nested with fail_fast" do
   before(:all) {make_tableless_model(nil, true)}
   after(:all){ remove_models }
+  describe "#new" do
+    it "accepts attributes" do
+      Chair.new(:name => "Jarl").should be_an_instance_of(Chair)
+    end
+    it "assign attributes" do
+      Chair.new(:name => "Jarl").name.should == "Jarl"
+    end
+    it "accepts nested attributes" do
+      Chair.new(:name => "Jarl", :arm_rests => [
+                                                ArmRest.new(:name => 'left'),
+                                                ArmRest.new(:name => 'right'),
+                                               ]).
+        should be_an_instance_of(Chair)
+    end
+    it "assign nested attributes" do
+      Chair.new(:name => "Jarl", :arm_rests => [
+                                                ArmRest.new(:name => 'left'),
+                                                ArmRest.new(:name => 'right'),
+                                               ]).
+        should have(2).arm_rests
+    end
+  end
   subject { Chair.new }
   it_behaves_like "a tableless model with fail_fast"
   it_behaves_like "a nested active record"
