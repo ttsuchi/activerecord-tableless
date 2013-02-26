@@ -185,10 +185,13 @@ module ActiveRecord
         end
       end
 
-      def quoted_table_name
-        ""
+      def connection
+        conn = Object.new()
+        def conn.quote_table_name(*args)
+          ""
+        end
+        conn
       end
-
   
     end
     

@@ -44,14 +44,18 @@ shared_examples_for "an active record" do
   it { should respond_to :name }
   it { should respond_to :name= }
   it { should respond_to :update_attributes }
+  describe "#attributes=" do
+    before(:each){ subject.attributes=({:name => 'Jarl Friis'}) }
+    it "assign attributes" do
+      subject.name.should == 'Jarl Friis'
+    end
+  end
 end
 
 shared_examples_for "a nested active record" do
-  if ActiveRecord::VERSION::STRING < "3.2"
-    describe "conllection#build" do
-      specify do
-        subject.arm_rests.build({:name => 'nice arm_rest'}).should be_an_instance_of(ArmRest)
-      end
+  describe "conllection#build" do
+    specify do
+      subject.arm_rests.build({:name => 'nice arm_rest'}).should be_an_instance_of(ArmRest)
     end
   end
   describe "conllection#<<" do
@@ -63,12 +67,25 @@ shared_examples_for "a nested active record" do
         subject.arm_rests << [ArmRest.new({:name => 'left'}),
                               ArmRest.new({:name => 'right'})]
       end
-      specify do
+      it "assigns nested attributes" do
         subject.arm_rests[0].name.should == 'left'
-      end
-      specify do
         subject.arm_rests[1].name.should == 'right'
       end
+    end
+  end
+  describe "#attributes=" do
+    before(:each){ subject.attributes=({ :name => 'Jarl Friis',
+                                         :arm_rests_attributes => [
+                                                                   {:name => 'left'},
+                                                                   {:name => 'right'}
+                                                                  ]
+                                       }) }
+    it "assigns attributes" do
+      subject.name.should == 'Jarl Friis'
+    end
+    it "assigns nested attributes" do
+      subject.arm_rests[0].name.should == 'left'
+      subject.arm_rests[1].name.should == 'right'
     end
   end
 end
@@ -150,19 +167,27 @@ describe "Tableless nested with fail_fast" do
     it "assign attributes" do
       Chair.new(:name => "Jarl").name.should == "Jarl"
     end
-    it "accepts nested attributes" do
-      Chair.new(:name => "Jarl", :arm_rests => [
-                                                ArmRest.new(:name => 'left'),
-                                                ArmRest.new(:name => 'right'),
-                                               ]).
-        should be_an_instance_of(Chair)
+    describe "with nested models" do
+      subject do
+        Chair.new(:name => "Jarl",
+                  :arm_rests => [
+                                 ArmRest.new(:name => 'left'),
+                                 ArmRest.new(:name => 'right'),
+                                ])
+      end
+      it {should be_an_instance_of(Chair) }
+      it {should have(2).arm_rests }
     end
-    it "assign nested attributes" do
-      Chair.new(:name => "Jarl", :arm_rests => [
-                                                ArmRest.new(:name => 'left'),
-                                                ArmRest.new(:name => 'right'),
-                                               ]).
-        should have(2).arm_rests
+    describe "with nested attributes" do
+      subject do
+        Chair.new(:name => "Jarl", 
+                  :arm_rests_attributes => [
+                                            {:name => 'left'},
+                                            {:name => 'right'},
+                                           ])
+      end
+      it {should be_an_instance_of(Chair)}
+      it {should have(2).arm_rests }
     end
   end
   subject { Chair.new }
