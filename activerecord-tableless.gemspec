@@ -30,6 +30,6 @@ Gem::Specification.new do |gem|
   gem.add_development_dependency('aruba', '>= 0.5')
   gem.add_development_dependency('capybara')
 
-  gem.add_development_dependency('launchy', '~> 2.1')
-  gem.add_development_dependency('debugger')
+#  gem.add_development_dependency('launchy', '~> 2.1')
+#  gem.add_development_dependency('debugger')
 end
