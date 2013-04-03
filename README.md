@@ -1,6 +1,8 @@
 ActiveRecord Tableless
 ======================
 
+[![Build Status](https://travis-ci.org/softace/activerecord-tableless.png)](http://travis-ci.org/softace/paperclip_database) [![Dependency Status](https://gemnasium.com/softace/paperclip_database.png)](https://gemnasium.com/softace/paperclip_database) [![Code Climate](https://codeclimate.com/badge.png)](https://codeclimate.com/github/softace/paperclip_database)
+
 A single implementation of the ActiveRecord Tableless pattern for any
 Rails project or other Ruby project that uses ActiveRecord.
 
