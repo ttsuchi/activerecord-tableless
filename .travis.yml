@@ -5,7 +5,7 @@ rvm:
   - 1.9.2
   - 1.9.3
 gemfile:
-  - gemfiles/rails23.gemfile
+#  - gemfiles/rails23.gemfile
   - gemfiles/rails30.gemfile
   - gemfiles/rails32.gemfile
   - gemfiles/rails3x.gemfile
