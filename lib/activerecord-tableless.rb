@@ -52,12 +52,14 @@ module ActiveRecord
                                       }
                                       )
           class_inheritable_reader :tableless_options
-        else
+        elsif ActiveRecord::VERSION::STRING >= "3.2.0"
           class_attribute :tableless_options
           self.tableless_options = {
             :database => options[:database],
             :columns => []
           }
+        else
+          raise Exception.new("Sorry, ActiveRecord version #{ActiveRecord::VERSION::STRING} is not supported")
         end
 
         # extend
@@ -114,7 +116,8 @@ module ActiveRecord
         end
       end
 
-      if ActiveRecord::VERSION::STRING < "3.0"
+      case ActiveRecord::VERSION::MAJOR
+      when 2
         def find_from_ids(*args)
           case tableless_options[:database]
           when :pretend_success
@@ -133,7 +136,7 @@ module ActiveRecord
             raise NoDatabase.new("Can't #find_every on Tableless class")
           end
         end
-      else ## ActiveRecord::VERSION::STRING >= "3.0"
+      when 3
         def all(*args)
           case tableless_options[:database]
           when :pretend_success
@@ -143,6 +146,18 @@ module ActiveRecord
           end
 
         end
+      when 4
+        def find_by_sql(*args)
+          case tableless_options[:database]
+          when :pretend_success
+            []
+          when :fail_fast
+            raise NoDatabase.new("Can't #find_by_sql on Tableless class")
+          end
+
+        end
+      else
+        raise Exceptioin.new("Unsupported ActiveRecord version")
       end
 
       def transaction(&block)
@@ -159,7 +174,7 @@ module ActiveRecord
         true
       end
 
-      if ActiveRecord::VERSION::STRING < "3.0.0"
+      if ActiveRecord::VERSION::MAJOR < 3
       else
         def table_exists?
           false
@@ -190,6 +205,16 @@ module ActiveRecord
         def conn.quote_table_name(*args)
           ""
         end
+        def conn.substitute_at(*args)
+          nil
+        end
+        def conn.schema_cache(*args)
+          schema_cache = Object.new()
+          def schema_cache.columns_hash(*args)
+            Hash.new()
+          end
+          schema_cache
+        end
         conn
       end
 
@@ -214,12 +239,30 @@ module ActiveRecord
         end
       end
 
+      def create_record(*args)
+        case self.class.tableless_options[:database]
+        when :pretend_success
+          true
+        when :fail_fast
+          raise NoDatabase.new("Can't #create_record a Tableless object")
+        end
+      end
+
       def update(*args)
         case self.class.tableless_options[:database]
         when :pretend_success
           true
         when :fail_fast
           raise NoDatabase.new("Can't #update a Tableless object")
+        end
+      end
+
+      def update_record(*args)
+        case self.class.tableless_options[:database]
+        when :pretend_success
+          true
+        when :fail_fast
+          raise NoDatabase.new("Can't #update_record a Tableless object")
         end
       end
 
@@ -242,8 +285,7 @@ module ActiveRecord
         end
       end
 
-      if ActiveRecord::VERSION::STRING < "3.0"
-      else
+      if ActiveRecord::VERSION::MAJOR >= 3
         def add_to_transaction
         end
       end

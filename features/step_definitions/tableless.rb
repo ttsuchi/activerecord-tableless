@@ -24,17 +24,14 @@ end
 
 Given /^I update my users controller to render instead of redirect$/ do
   in_current_dir do
-    file_name = 'app/controllers/users_controller.rb'
-    content = File.read(file_name)
-
-    content.gsub!("@user = User.new(params[:user])",
-                  "@user = User.new(params[:user]); @user.id = 1")
-
-    content.gsub!("if @user.save",
-                  "if @user.valid?")
-
-    content.gsub!(/format.html \{ redirect_to[\( ]@user, .*? \}/,
-                  "format.html { render :action => 'show' }")
-    File.open(file_name, 'w') { |f| f << content }
+    transform_file('app/controllers/users_controller.rb') do |content|
+      ##Changes in #create method
+      content.gsub!(/@user = User.new\((.*?)\)/,
+                    '@user = User.new(\1); @user.id = 1')
+      content.gsub!("if @user.save",
+                    "if @user.valid?")
+      content.gsub!(/redirect_to([\( ])@user, .*?([\)]| \}|$)/,
+                    "render\\1:action => 'show'\\2")
+    end
   end
 end

@@ -27,3 +27,9 @@ appraise "rails3x" do
   gem "activerecord-tableless", :path => "../"
 end
 
+appraise "rails40" do
+  gem "rails", "~> 4.0.0"
+  gem "jquery-rails"
+  gem "activerecord-tableless", :path => "../"
+end
+

@@ -31,16 +31,20 @@ module RailsCommandHelpers
     @framework_version ||= `rails -v`[/^Rails (.+)$/, 1]
   end
 
-  def new_application_command
-    framework_version?("3") ? "rails new" : "rails"
+  def framework_major_version
+    framework_version.split(".").first.to_i
+  end
+
+  def new_application_command(app_name)
+    framework_major_version >= 3 ? "rails new #{app_name} --skip-sprockets --skip-javascript --skip-bundle" : "rails #{app_name}"
   end
 
   def generator_command
-    framework_version?("3") ? "script/rails generate" : "script/generate"
+    framework_major_version >= 3 ? "rails generate" : "script/generate"
   end
 
   def runner_command
-    framework_version?("3") ? "script/rails runner" : "script/runner"
+    framework_major_version >= 3 ? "rails runner" : "script/runner"
   end
 
 end

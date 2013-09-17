@@ -9,10 +9,10 @@ def make_tableless_model(database = nil, nested = nil)
     #{database ? "has_no_table :database => :#{database}" : 'has_no_table'}
     column :id, :integer
     column :name, :string
-    #{if nested 
+    #{if nested
       '
       has_many :arm_rests
-      accepts_nested_attributes_for :arm_rests 
+      accepts_nested_attributes_for :arm_rests
       '
       end}
   end
@@ -93,7 +93,8 @@ end
 shared_examples_for "a tableless model with fail_fast" do
   it_behaves_like "an active record"
   describe "class" do
-    if ActiveRecord::VERSION::STRING < "3.0"
+    case ActiveRecord::VERSION::MAJOR
+    when 2
       describe "#find" do
         it "raises ActiveRecord::Tableless::NoDatabase" do
           expect { Chair.find(1) }.to raise_exception(ActiveRecord::Tableless::NoDatabase)
@@ -104,10 +105,21 @@ shared_examples_for "a tableless model with fail_fast" do
           expect { Chair.find(:all) }.to raise_exception(ActiveRecord::Tableless::NoDatabase)
         end
       end
-    else ## ActiveRecord::VERSION::STRING >= "3.0"
+    when 3
       describe "#all" do
         it "raises ActiveRecord::Tableless::NoDatabase" do
           expect { Chair.all }.to raise_exception(ActiveRecord::Tableless::NoDatabase)
+        end
+      end
+    when 4
+      describe "#all" do
+        it "raises ActiveRecord::Tableless::NoDatabase" do
+          expect { Chair.all }.to_not raise_exception
+        end
+      end
+      describe "#all[]" do
+        it "raises ActiveRecord::Tableless::NoDatabase" do
+          expect { Chair.all[0] }.to raise_exception(ActiveRecord::Tableless::NoDatabase)
         end
       end
     end
@@ -180,7 +192,7 @@ describe "Tableless nested with fail_fast" do
     end
     describe "with nested attributes" do
       subject do
-        Chair.new(:name => "Jarl", 
+        Chair.new(:name => "Jarl",
                   :arm_rests_attributes => [
                                             {:name => 'left'},
                                             {:name => 'right'},
@@ -205,7 +217,8 @@ end
 shared_examples_for "a succeeding database" do
   it_behaves_like "an active record"
   describe "class" do
-    if ActiveRecord::VERSION::STRING < "3.0"
+    case ActiveRecord::VERSION::MAJOR
+    when 2
       describe "#find" do
         it "raises ActiveRecord::RecordNotFound" do
           expect { Chair.find(314) }.to raise_exception(ActiveRecord::RecordNotFound)
@@ -214,7 +227,7 @@ shared_examples_for "a succeeding database" do
       describe "#find(:all)" do
         specify { Chair.find(:all).should == []}
       end
-    else ## ActiveRecord::VERSION::STRING >= "3.0"
+    when 3, 4
       describe "#all" do
         specify { Chair.all.should == []}
       end
@@ -252,7 +265,7 @@ describe "Active record with real database" do
     ActiveRecord::Base.establish_connection(:adapter  => 'sqlite3', :database => 'tmp/test.db')
     ActiveRecord::Base.connection.execute("drop table if exists chairs")
     ActiveRecord::Base.connection.execute("create table chairs (id INTEGER PRIMARY KEY, name TEXT )")
-    
+
     class Chair < ActiveRecord::Base
     end
   end

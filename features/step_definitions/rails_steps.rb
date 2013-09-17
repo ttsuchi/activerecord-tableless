@@ -1,6 +1,6 @@
 Given /^I generate a new rails application$/ do
   steps %{
-    When I successfully run `bundle exec #{new_application_command} #{APP_NAME}`
+    When I successfully run `bundle exec #{new_application_command(APP_NAME)}`
     And I cd to "#{APP_NAME}"
     And I turn off class caching
     And I write to "Gemfile" with:
@@ -131,6 +131,16 @@ module FileHelpers
       gemfile = File.read("Gemfile")
       gemfile.sub!(/^(\s*)(gem\s*['"]#{gemname})/, "\\1# \\2")
       File.open("Gemfile", 'w'){ |file| file.write(gemfile) }
+    end
+  end
+
+  def transform_file(filename)
+    if File.exists?(filename)
+      content = File.read(filename)
+      File.open(filename, "w") do |f|
+        content = yield(content)
+        f.write(content)
+      end
     end
   end
 end
