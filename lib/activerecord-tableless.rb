@@ -1,26 +1,26 @@
 # See #ActiveRecord::Tableless
 
 module ActiveRecord
-  
+
   # = ActiveRecord::Tableless
-  # 
+  #
   # Allow classes to behave like ActiveRecord models, but without an associated
   # database table. A great way to capitalize on validations. Based on the
   # original post at http://www.railsweenie.com/forums/2/topics/724 (which seems
   # to have disappeared from the face of the earth).
-  # 
+  #
   # = Example usage
-  # 
+  #
   #  class ContactMessage < ActiveRecord::Base
-  #    
+  #
   #    has_no_table
-  #    
+  #
   #    column :name,    :string
   #    column :email,   :string
   #    column :message, :string
-  #    
+  #
   #  end
-  #  
+  #
   #  msg = ContactMessage.new( params[:msg] )
   #  if msg.valid?
   #    ContactMessageSender.deliver_message( msg )
@@ -28,7 +28,7 @@ module ActiveRecord
   #  end
   #
   module Tableless
-    
+
     class Exception < StandardError
     end
     class NoDatabase < Exception
@@ -37,9 +37,9 @@ module ActiveRecord
     def self.included( base ) #:nodoc:
       base.send :extend, ActsMethods
     end
-    
+
     module ActsMethods #:nodoc:
-      
+
       # A model that needs to be tableless will call this method to indicate
       # it.
       def has_no_table(options = {:database => :fail_fast})
@@ -63,32 +63,32 @@ module ActiveRecord
         # extend
         extend  ActiveRecord::Tableless::SingletonMethods
         extend  ActiveRecord::Tableless::ClassMethods
-        
+
         # include
         include ActiveRecord::Tableless::InstanceMethods
-        
+
         # setup columns
       end
-      
+
       def tableless?
         false
       end
 
     end
-    
+
     module SingletonMethods
-      
+
       # Return the list of columns registered for the model. Used internally by
       # ActiveRecord
       def columns
         tableless_options[:columns]
       end
-  
+
       # Register a new column.
       def column(name, sql_type = nil, default = nil, null = true)
         tableless_options[:columns] << ActiveRecord::ConnectionAdapters::Column.new(name.to_s, default, sql_type.to_s, null)
       end
-      
+
       # Register a set of colums with the same SQL type
       def add_columns(sql_type, *args)
         args.each do |col|
@@ -113,18 +113,18 @@ module ActiveRecord
           raise NoDatabase.new("Can't #destroy_all on Tableless class")
         end
       end
-      
+
       if ActiveRecord::VERSION::STRING < "3.0"
         def find_from_ids(*args)
           case tableless_options[:database]
           when :pretend_success
             raise ActiveRecord::RecordNotFound.new("Couldn't find #{self} with ID=#{args[0].to_s}")
-            
+
           when :fail_fast
             raise NoDatabase.new("Can't #find_from_ids on Tableless class")
           end
         end
-        
+
         def find_every(*args)
           case tableless_options[:database]
           when :pretend_success
@@ -141,10 +141,10 @@ module ActiveRecord
           when :fail_fast
             raise NoDatabase.new("Can't #find_every on Tableless class")
           end
-          
+
         end
       end
-      
+
       def transaction(&block)
 #        case tableless_options[:database]
 #        when :pretend_success
@@ -154,7 +154,7 @@ module ActiveRecord
 #          raise NoDatabase.new("Can't #transaction on Tableless class")
 #        end
       end
-      
+
       def tableless?
         true
       end
@@ -166,9 +166,9 @@ module ActiveRecord
         end
       end
     end
-    
+
     module ClassMethods
-          
+
       def from_query_string(query_string)
         unless query_string.blank?
           params = query_string.split('&').collect do |chunk|
@@ -178,7 +178,7 @@ module ActiveRecord
             value = value.nil? ? nil : CGI.unescape(value)
             [ CGI.unescape(key), value ]
           end.compact.to_h
-          
+
           new(params)
         else
           new
@@ -192,15 +192,15 @@ module ActiveRecord
         end
         conn
       end
-  
+
     end
-    
+
     module InstanceMethods
-    
+
       def to_query_string(prefix = nil)
         attributes.to_a.collect{|(name,value)| escaped_var_name(name, prefix) + "=" + escape_for_url(value) if value }.compact.join("&")
       end
-    
+
       def quote_value(value, column = nil)
         ""
       end
@@ -241,7 +241,7 @@ module ActiveRecord
           raise NoDatabase.new("Can't #reload a Tableless object")
         end
       end
-      
+
       if ActiveRecord::VERSION::STRING < "3.0"
       else
         def add_to_transaction
@@ -249,11 +249,11 @@ module ActiveRecord
       end
 
       private
-      
+
         def escaped_var_name(name, prefix = nil)
           prefix ? "#{URI.escape(prefix)}[#{URI.escape(name)}]" : URI.escape(name)
         end
-      
+
         def escape_for_url(value)
           case value
             when true then "1"
@@ -264,9 +264,9 @@ module ActiveRecord
         rescue
           ""
         end
-      
+
     end
-    
+
   end
 end
 
