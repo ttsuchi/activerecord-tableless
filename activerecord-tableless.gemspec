@@ -10,7 +10,7 @@ Gem::Specification.new do |gem|
   gem.files         = `git ls-files`.split($\)
   gem.executables   = gem.files.grep(%r{^bin/}).map{ |f| File.basename(f) }
   gem.test_files    = gem.files.grep(%r{^(test|spec|features)/})
-  gem.version       = "1.2.0"
+  gem.version       = "1.3.0"
   gem.has_rdoc      = true
 
   gem.require_paths = ["lib"]
@@ -29,6 +29,10 @@ Gem::Specification.new do |gem|
   gem.add_development_dependency("rspec")
   gem.add_development_dependency('aruba', '>= 0.5')
   gem.add_development_dependency('capybara')
+
+  ##Specifying upper limit version for ruby 1.8.7
+  gem.add_development_dependency('nokogiri', '< 1.6')
+  gem.add_development_dependency('capybara', '< 2.1')
 
 #  gem.add_development_dependency('launchy', '~> 2.1')
 #  gem.add_development_dependency('debugger')
