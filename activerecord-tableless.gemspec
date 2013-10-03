@@ -2,13 +2,13 @@
 
 Gem::Specification.new do |gem|
   gem.name          = 'activerecord-tableless'
-  gem.version       = "1.3.2"
+  gem.version       = "1.3.3"
   gem.platform      = Gem::Platform::RUBY
   gem.authors       = ["Jarl Friis", "Kenneth Kalmer", "Michal Zima"]
   gem.email         = ["jarl@softace.dk"]
   gem.homepage      = "https://github.com/softace/activerecord-tableless"
   gem.summary       = %q{A library for implementing tableless ActiveRecord models}
-  gem.description   = %q{ActiveRecord Tableless Models provides a simple mixin for creating models that are not bound to the database. This approach is mostly useful for capitalizing on the features ActiveRecord::Validation}
+  gem.description   = %q{ActiveRecord Tableless Models provides a simple mixin for creating models that are not bound to the database. This approach is useful for taking advantage of the features of ActiveRecord such as validation, relationships, etc.}
   gem.license       = 'MIT'
 
   gem.files         = `git ls-files`.split($\)
