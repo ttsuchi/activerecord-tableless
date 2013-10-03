@@ -228,39 +228,14 @@ module ActiveRecord
         ""
       end
 
-      def create(*args)
-        case self.class.tableless_options[:database]
-        when :pretend_success
-          true
-        when :fail_fast
-          raise NoDatabase.new("Can't #create a Tableless object")
-        end
-      end
-
-      def create_record(*args)
-        case self.class.tableless_options[:database]
-        when :pretend_success
-          true
-        when :fail_fast
-          raise NoDatabase.new("Can't #create_record a Tableless object")
-        end
-      end
-
-      def update(*args)
-        case self.class.tableless_options[:database]
-        when :pretend_success
-          true
-        when :fail_fast
-          raise NoDatabase.new("Can't #update a Tableless object")
-        end
-      end
-
-      def update_record(*args)
-        case self.class.tableless_options[:database]
-        when :pretend_success
-          true
-        when :fail_fast
-          raise NoDatabase.new("Can't #update_record a Tableless object")
+      %w(create create_record update update_record).each do |method_name|
+        define_method(method_name) do |*args|
+          case self.class.tableless_options[:database]
+          when :pretend_success
+            true
+          when :fail_fast
+            raise NoDatabase.new("Can't ##{method_name} a Tableless object")
+          end
         end
       end
 
