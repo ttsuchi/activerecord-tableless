@@ -213,6 +213,9 @@ module ActiveRecord
           end
           schema_cache
         end
+        def conn.sanitize_limit(limit_value)
+          1
+        end
         conn
       end
 
